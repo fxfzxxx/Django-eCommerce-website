@@ -5,6 +5,7 @@ ENVIRONMENT = os.getenv('ENVIRONMENT', 'development')
 DEBUG = True
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = '-05sgp9!deq=q1nltm@^^2cc+v29i(tyybv3v2t77qi66czazj'
+STRIPE_SECRET_KEY = 'sk_test_51HICn0HCQFCyAcXOod4lVSWpTKminMoOqaMMN7KjbmOaibbAXaemh3OAWpqzyxGau5MLYaEwkK1fGeqG4b48AQaJ00IHDIFNFU'
 ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
@@ -20,7 +21,8 @@ INSTALLED_APPS = [
     'allauth.account',
     'allauth.socialaccount',
     'core',
-    'crispy_forms'
+    'crispy_forms',
+    'django_countries'
 ]
 
 MIDDLEWARE = [
