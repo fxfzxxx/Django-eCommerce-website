@@ -4,12 +4,9 @@
 
 
 <body>
-
-
   <!--Main layout-->
   <main>
     <div class="container">
-
       <!--Navbar-->
       <nav class="navbar navbar-expand-lg navbar-dark mdb-color lighten-3 mt-3 mb-5">
 
@@ -55,7 +52,6 @@
 
       </nav>
       <!--/.Navbar-->
-
       <!--Section: Products v.3-->
       <section class="text-center mb-4">
 
@@ -72,9 +68,10 @@
             <div class="card">
 
               <!--Card image-->
-              <div class="view overlay">
-                <img src="https://mdbootstrap.com/img/Photos/Horizontal/E-commerce/Vertical/12.jpg" class="card-img-top"
-                  alt="">
+              <div class="view overlay">               
+                {% comment %} <img src="https://mdbootstrap.com/img/Photos/Horizontal/E-commerce/Vertical/12.jpg" class="card-img-top" {% endcomment %}
+                <img src="{{item.image.url}}" class="card-img-top"
+                alt="">
                 <a href="{{ item.get_absolute_url }}">
                   <div class="mask rgba-white-slight"></div>
                 </a>
