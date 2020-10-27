@@ -79,6 +79,20 @@ class Order(models.Model):
     payment = models.ForeignKey(
         'payment', on_delete=models.SET_NULL, blank=True, null=True)
     coupon = models.ForeignKey('Coupon', on_delete=models.SET_NULL, blank=True, null=True)
+    being_delivered = models.BooleanField(default=False)
+    received = models.BooleanField(default=False)
+    refund_requested = models.BooleanField(default=False)
+    refund_granted = models.BooleanField(default=False)
+
+    '''
+    1. Items added to the cart.
+    2. Adding shipping address.
+    3. Payment.
+    (preprocessing, processing, packaging etc.)
+    4. Being delivered.
+    5. Revieved.
+    6. Refunds.
+    '''
 
     def __str__(self):
         return self.user.username
@@ -126,3 +140,13 @@ class Coupon(models.Model):
 
     def __str__(self):
         return self.code
+
+
+class Refund(models.Model):
+    order = models.ForeignKey(Order, on_delete=models.CASCADE)
+    reason = models.TextField()
+    accepted = models.BooleanField(default=False)
+    email = models.EmailField()
+
+    def __str__(self):
+        return f"{self.pk}"
