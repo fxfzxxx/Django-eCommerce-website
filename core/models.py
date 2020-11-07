@@ -3,6 +3,7 @@ from django.conf import settings
 from django.shortcuts import reverse
 from django.utils import timezone
 from django_countries.fields import CountryField
+from django.db.models.signals import post_save
 
 
 LABEL_CHOICES = (
@@ -16,6 +17,21 @@ CATEGORY_CHOICES = (
     ('SW', 'Sport wear'),
     ('OW', 'Outwear')
 )
+
+ADDRESS_CHOICES = (
+    ('B', 'Billing'),
+    ('S', 'Shipping')
+)
+
+
+class UserProfile(models.Model):
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    stripe_customer_id = models.CharField(max_length=50, blank=True, null=True)
+    one_click_purchasing = models.BooleanField(default=False)
+
+    def __str__(self):
+        return self.user.username
 
 
 class Item(models.Model):
@@ -65,6 +81,9 @@ class OrderItems(models.Model):
     def __str__(self):
         return f"{self.quantity} of {self.item.title}"
 
+    class Meta:
+        verbose_name_plural = 'Order items'
+
 
 class Order(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL,
@@ -74,8 +93,10 @@ class Order(models.Model):
     ordered_date = models.DateTimeField(default=timezone.now)
     start_date = models.DateTimeField(auto_now_add=True)
     ordered = models.BooleanField(default=False)
+    shipping_address = models.ForeignKey(
+        'Address', related_name='shipping_address', on_delete=models.SET_NULL, blank=True, null=True)
     billing_address = models.ForeignKey(
-        'BillingAddress', on_delete=models.SET_NULL, blank=True, null=True)
+        'Address', related_name='billing_address', on_delete=models.SET_NULL, blank=True, null=True)
     payment = models.ForeignKey(
         'payment', on_delete=models.SET_NULL, blank=True, null=True)
     coupon = models.ForeignKey('Coupon', on_delete=models.SET_NULL, blank=True, null=True)
@@ -106,7 +127,7 @@ class Order(models.Model):
         return total
 
 
-class BillingAddress(models.Model):
+class Address(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL,
                              on_delete=models.CASCADE)
     first_name = models.CharField(max_length=100)
@@ -116,12 +137,17 @@ class BillingAddress(models.Model):
     apartment_address = models.CharField(max_length=100)
     country = CountryField(multiple=False)
     zip = models.CharField(max_length=100)
+    address_type = models.CharField(max_length=1, choices=ADDRESS_CHOICES)
+    default = models.BooleanField(default=False)
     # same_billing_adress
     # save_info
     # paymemt_option
 
     def __str__(self):
         return self.user.username
+
+    class Meta:
+        verbose_name_plural = 'Addresses'
 
 
 class Payment(models.Model):
@@ -150,3 +176,11 @@ class Refund(models.Model):
 
     def __str__(self):
         return f"{self.pk}"
+
+
+def userprofile_receiver(sender, instance, created, *args, **kwargs):
+    if created:
+        userprofile = UserProfile.objects.create(user=instance)
+
+
+post_save.connect(userprofile_receiver, sender=settings.AUTH_USER_MODEL)
